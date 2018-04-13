@@ -1,0 +1,4 @@
+---
+# handlers file for voipmonitor.install
+- name: restart voipmonitor
+  command: systemctl restart voipmonitor.service

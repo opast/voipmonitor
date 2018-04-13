@@ -1,0 +1,61 @@
+---
+# tasks file for voipmonitor.install
+
+- name: centos | delete old voipmonitor folder
+  shell: rm -rf /usr/src/voipmonitor*
+  when: ansible_os_family == "RedHat"
+  tags:
+    - install
+    - update
+
+#- name: centos | delete old voipmonitor folder
+#  file: path="/usr/src/voipmonitor/" state=absent
+  when: ansible_os_family == "RedHat"
+  tags:
+    - install
+    - update
+
+- name: centos | download Voipmonitor
+  shell: creates=/usr/src/voipmonitor.tar.gz wget -O - http://www.voipmonitor.org/current-stable-sniffer-static-64bit.tar.gz | tar -xz -C /usr/src/
+  when: ansible_os_family == "RedHat"
+  tags:
+    - install
+    - update
+
+- name: centos | move Voipmonitor to /usr/src/voipmonitor
+  shell: mv /usr/src/voipmonitor* /usr/src/voipmonitor
+  when: ansible_os_family == "RedHat"
+  tags:
+    - install
+    - update
+
+- name: centos | do not ask about overwrite /etc/voipmonitor.conf
+  shell: sed -i 's/^cp -i/cp/g' /usr/src/voipmonitor/install-script.sh
+  when: ansible_os_family == "RedHat"
+  tags:
+    - install
+    - update
+
+- name: centos | install Voipmonitor
+  command: chdir=/usr/src/voipmonitor ./install-script.sh
+  when: ansible_os_family == "RedHat"
+  tags:
+    - install
+    - update
+
+- name: centos | create config file
+  template: src=etc/voipmonitor.conf.j2
+            dest=/etc/voipmonitor.conf
+            mode=0644 owner=root group=root
+            backup=yes
+  when: ansible_os_family == "RedHat"
+  tags:
+    - install
+    - update
+
+- name: centos | enable voipmonitor
+  service: name=voipmonitor state=restarted enabled=yes
+  when: ansible_os_family == "RedHat"
+  tags:
+    - install
+    - update
